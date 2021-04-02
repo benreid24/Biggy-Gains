@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
     from .sentiment.interface import Sentiment, SentimentSource
     from .stock import Order, ExecutedOrder
     from .trading.interface import TradeInterface, PricingSource
+    from .datastore.interface import Datastore
     from biggygains.bots.interface import Bot
 
 from .portfolio import Portfolio
@@ -86,6 +87,7 @@ class Environment:
         self.trade_interface = None
         self.portfolio = Portfolio(0)
         self.update_period_seconds = 60
+        self.datastore = None
 
     def connect_sentiment_source(self, source: SentimentSource):
         self.sentiment_sources.append(source)
@@ -122,12 +124,15 @@ class Environment:
     ##################################################################
 
     def run(self):
-        while True:
-            self.trade_interface.update(self)
-            for source in self.sentiment_sources:
-                source.update(self)
-            self.bot.update(self)
-            time.sleep(self.update_period_seconds)
+        try:
+            while True:
+                self.trade_interface.update(self)
+                for source in self.sentiment_sources:
+                    source.update(self)
+                self.bot.update(self)
+                time.sleep(self.update_period_seconds)
+        except Exception:
+            logger.exception('Encountered runtime error, terminating')
 
     def initialize(self) -> bool:
         for sentiment_source in self.sentiment_sources:
@@ -149,3 +154,6 @@ class Environment:
 
     def connect_bot(self, bot: Bot):
         self.bot = bot
+
+    def set_datastore(self, store: Datastore):
+        self.datastore = store

@@ -7,7 +7,8 @@ import time
 
 if typing.TYPE_CHECKING:
     from .sentiment.interface import Sentiment, SentimentSource
-    from .stock import Order, ExecutedOrder, TradeInterface, PricingSource
+    from .stock import Order, ExecutedOrder
+    from .trading.interface import TradeInterface, PricingSource
     from biggygains.bots.interface import Bot
 
 from .portfolio import Portfolio

@@ -6,13 +6,13 @@ import datetime
 import time
 
 if typing.TYPE_CHECKING:
-    from .sentiment.interface import Sentiment, SentimentSource
-    from .stock import Order, ExecutedOrder
-    from .trading.interface import TradeInterface, PricingSource
-    from .datastore.interface import Datastore
+    from biggygains.components.sentiment.interface import Sentiment, SentimentSource
+    from biggygains.trading.stock import Order, ExecutedOrder
+    from biggygains.trading.interface import TradeInterface, PricingSource
+    from biggygains.datastore.interface import Datastore
     from biggygains.bots.interface import Bot
 
-from .portfolio import Portfolio
+from biggygains.trading.portfolio import Portfolio
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,12 @@ class Environment:
         Places an order. The order will not reflect in portfolio until it is executed
         """
         return self.trade_interface.place_order(order)
+
+    def cancel_order(self, order_id) -> bool:
+        """
+        Cancels an open order and returns True if canceled, False if unable or not found
+        """
+        return self.trade_interface.cancel_order(order_id)
 
     def open_orders(self) -> typing.List[Order]:
         """

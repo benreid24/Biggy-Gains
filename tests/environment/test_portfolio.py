@@ -1,6 +1,6 @@
 import unittest
 
-from biggygains.environment import portfolio as port
+from biggygains.trading import portfolio as port
 
 
 class PositionTests(unittest.TestCase):

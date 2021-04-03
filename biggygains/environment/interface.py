@@ -6,13 +6,13 @@ import datetime
 import time
 
 if typing.TYPE_CHECKING:
-    from .sentiment.interface import Sentiment, SentimentSource
-    from .stock import Order, ExecutedOrder
-    from .trading.interface import TradeInterface, PricingSource
-    from .datastore.interface import Datastore
+    from biggygains.components.sentiment.interface import Sentiment, SentimentSource
+    from biggygains.trading.stock import Order, ExecutedOrder
+    from biggygains.trading.interface import TradeInterface, PricingSource
+    from biggygains.datastore.interface import Datastore
     from biggygains.bots.interface import Bot
 
-from .portfolio import Portfolio
+from biggygains.trading.portfolio import Portfolio
 
 logger = logging.getLogger(__name__)
 

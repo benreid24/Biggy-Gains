@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime, timedelta
 
-from .interface import TradeInterface, PricingSource
-from biggygains.environment.stock import Order, OrderType, ExecutedOrder
+from biggygains.trading.interface import TradeInterface, PricingSource
+from biggygains.trading.stock import Order, OrderType, ExecutedOrder
 from biggygains.environment.interface import Environment
-from biggygains.environment.portfolio import Position
+from biggygains.trading.portfolio import Position
 
 from alpaca_trade_api import REST as Alpaca
 

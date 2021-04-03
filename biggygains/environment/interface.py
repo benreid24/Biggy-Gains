@@ -70,6 +70,12 @@ class Environment:
         """
         return self.trade_interface.place_order(order)
 
+    def cancel_order(self, order_id) -> bool:
+        """
+        Cancels an open order and returns True if canceled, False if unable or not found
+        """
+        return self.trade_interface.cancel_order(order_id)
+
     def open_orders(self) -> typing.List[Order]:
         """
         Returns a list of all currently open orders

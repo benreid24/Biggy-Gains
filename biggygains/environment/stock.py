@@ -7,7 +7,6 @@ import typing
 if typing.TYPE_CHECKING:
     from biggygains.environment.interface import Environment
 
-logger = logging.getLogger(__name__)
 
 """
 A basic quote for a stock. Includes bid, ask, and mid prices, as well as current
@@ -86,9 +85,9 @@ Basic enumeration representing supported order types
 """
 class OrderType(enum.Enum):
     Market = 'market'
-    Limit = 'Limit'
+    Limit = 'limit'
     Stop = 'stop'
-    StopLimit = 'limit'
+    StopLimit = 'stoplimit'
     # Add whatever else is supported
 
 
@@ -102,6 +101,6 @@ class Order:
         self.quantity = quantity
         self.is_buy = is_buy
         self.is_sell = not is_buy
-        self.order_id = None
+        self.order_id = kwargs['order_id'] if 'order_id' in kwargs else None
         self.limit_price = kwargs['limit_price'] if 'limit_price' in kwargs else None
         self.stop_price = kwargs['stop_price'] if 'stop_price' in kwargs else None

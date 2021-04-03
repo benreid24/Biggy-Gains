@@ -74,6 +74,14 @@ class TradeInterface:
         logger.warning(f'place_order() is unimplemented in {type(self).__name__}')
         return False
 
+    def cancel_order(self, order_id) -> bool:
+        """
+        Cancels an open order and returns True if canceled, False if unable or not found
+        """
+
+        logger.warning(f'cancel_order() is unimplemented in {type(self).__name__}')
+        return False
+
     def market_open(self) -> bool:
         """
         Returns whether or not the market is open for trading

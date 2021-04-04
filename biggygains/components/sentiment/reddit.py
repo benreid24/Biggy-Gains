@@ -44,14 +44,9 @@ used to evaluate current sentiment. Past days of sentiment only stored
 aggregated. Today's comments are individually stored
 """
 class DayComments:
-    def __init__(self, date: datetime.date, data: dict=None):
+    def __init__(self, date: datetime.date):
         self.date = date
         self.data = {}
-        if data:
-            self.data = {
-                key: Comment.from_dict(value)
-                for key, value in data.items()
-            }
 
     @classmethod
     def from_dict(d):

@@ -5,7 +5,6 @@ import logging
 import datetime
 import time
 
-#if typing.TYPE_CHECKING:
 from biggygains.components.sentiment.interface import Sentiment, SentimentSource
 from biggygains.trading.stock import Order, ExecutedOrder
 from biggygains.trading.interface import TradeInterface, PricingSource

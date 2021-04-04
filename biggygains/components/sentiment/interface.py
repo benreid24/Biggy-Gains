@@ -55,6 +55,13 @@ class SentimentSource:
         logger.warning(f'initialize() is unimplemented in {type(self).__name__}')
         pass
 
+    def shutdown(self, environment: Environment):
+        """
+        This is called when the bot is shutting down. This is the place to persist
+        data needed for future runs
+        """
+        logger.warning(f'shutdown() is unimplemented in {type(self).__name__}')
+
     def update(self, environment: Environment):
         """
         Update sentiment based on new data. This is called by the environment and
@@ -81,3 +88,16 @@ class SentimentSource:
         """
 
         return self.sentiment
+
+
+"""
+Base class for different sentiment analysis engines
+"""
+class SentimentAnalyzer:
+    def analyze(self, message: str) -> int:
+        """
+        Return -1 for negative sentiment, 0 for neutral, and 1 for positive
+        """
+
+        logger.warning(f'analyze is unimplemented in {type(self).__name__}')
+        return 0

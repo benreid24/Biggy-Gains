@@ -22,6 +22,13 @@ class Bot:
         logger.error(f'initialize() is unimplemented in {type(self).__name__}')
         return False
 
+    def shutdown(self, environment: Environment):
+        """
+        This is called when the bot is shutting down. This is the place to persist
+        data needed for future runs
+        """
+        logger.warning(f'shutdown() is unimplemented in {type(self).__name__}')
+
     def update(self, environment: Environment):
         """
         Perform all update logic. Buy stocks, sell stocks, watch sentiment, etc.

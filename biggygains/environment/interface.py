@@ -147,6 +147,8 @@ class Environment:
                 time.sleep(self.update_period_seconds)
         except Exception:
             logger.exception('Encountered runtime error, terminating')
+        finally:
+            self._shutdown()
 
     def initialize(self) -> bool:
         for sentiment_source in self.sentiment_sources:
@@ -165,6 +167,11 @@ class Environment:
             logger.error('Failed to initialize bot')
             return False
         return True
+
+    def _shutdown(self):
+        for source in self.sentiment_sources:
+            source.shutdown(self)
+        self.bot.shutdown(self)
 
     def connect_bot(self, bot: Bot):
         self.bot = bot

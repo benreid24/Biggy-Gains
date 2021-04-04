@@ -25,14 +25,14 @@ class Datastore:
         logger.warning(f'clear() is not implemented in {type(self).__name__}')
         return False
 
-    def store_data(self, key, value) -> bool:
+    def store_data(self, key: str, value: str) -> bool:
         """
         Stores the given key value pair
         """
         logger.warning(f'store_data() is not implemented in {type(self).__name__}')
         return False
 
-    def retrieve_data(self, key):
+    def retrieve_data(self, key: str) -> str:
         """
         Fetches the stored data for the given key. Returns None on error
         """

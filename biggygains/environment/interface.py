@@ -5,12 +5,14 @@ import logging
 import datetime
 import time
 
-if typing.TYPE_CHECKING:
-    from biggygains.components.sentiment.interface import Sentiment, SentimentSource
-    from biggygains.trading.stock import Order, ExecutedOrder
-    from biggygains.trading.interface import TradeInterface, PricingSource
-    from biggygains.datastore.interface import Datastore
-    from biggygains.bots.interface import Bot
+#if typing.TYPE_CHECKING:
+from biggygains.components.sentiment.interface import Sentiment, SentimentSource
+from biggygains.trading.stock import Order, ExecutedOrder
+from biggygains.trading.interface import TradeInterface, PricingSource
+from biggygains.datastore.interface import Datastore
+from biggygains.bots.interface import Bot
+
+
 
 from biggygains.trading.portfolio import Portfolio
 
@@ -88,12 +90,12 @@ class Environment:
 
     def __init__(self):
         self.sentiment_sources = []
-        self.bot = None
-        self.price_source = None
-        self.trade_interface = None
+        self.bot = Bot()
+        self.price_source = PricingSource()
+        self.trade_interface = TradeInterface()
         self.portfolio = Portfolio(0)
         self.update_period_seconds = 60
-        self.datastore = None
+        self.datastore = Datastore()
 
     def connect_sentiment_source(self, source: SentimentSource):
         self.sentiment_sources.append(source)
@@ -124,6 +126,12 @@ class Environment:
             self.portfolio.buy(order.ticker, order.quantity, order.avg_price)
         else:
             self.portfolio.sell(order.ticker, order.quantity, order.avg_price)
+
+    def ticker_exists(self, ticker) -> bool:
+        """
+        Tests whether or not the given ticker is valid
+        """
+        return self.trade_interface.ticker_exists(ticker)
 
     ##################################################################
     #            Methods to be used by global setup code             #

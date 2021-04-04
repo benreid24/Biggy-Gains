@@ -97,3 +97,11 @@ class TradeInterface:
 
         logger.warning(f'open_orders() is unimplemented in {type(self).__name__}')
         return []
+
+    def ticker_exists(self, ticker) -> bool:
+        """
+        Tests whether the given ticker is valid
+        """
+        
+        logger.warning(f'ticker_exists() is unimplemented in {type(self).__name__}')
+        return ticker.upper() in ['GME', 'AMC', 'AAPL']

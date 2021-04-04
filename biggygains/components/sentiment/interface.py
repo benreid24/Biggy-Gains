@@ -17,11 +17,21 @@ to indicate confidence, so long as all confidence values are computed
 in the same way
 """
 class Sentiment:
-    def __init__(self, ticker, value, confidence, source: SentimentSource):
+    def __init__(self, ticker, value, confidence):
         self.ticker = ticker
         self.value = value
         self.confidence = confidence
-        self.source = source
+
+    @classmethod
+    def from_dict(d: dict) -> Sentiment:
+        return Sentiment(d['ticker'], d['value'], d['confidence'])
+
+    def to_dict(self) -> dict:
+        return {
+            'ticker': self.ticker,
+            'value': self.value,
+            'confidence': self.confidence
+        }
 
     def __cmp__(self, other):
         return cmp(self.value, other.value)
@@ -54,18 +64,20 @@ class SentimentSource:
         logger.warning(f'update() is unimplemented in {type(self).__name__}')
         pass
 
-    def get_sentiment(self, ticker) -> Sentiment:
+    def get_sentiment(self, ticker) -> typing.List[Sentiment]:
         """
-        Returns sentiment for a given ticker, or None if no data
+        Returns sentiment for a given ticker, or None if no data. Entries in list represent
+        past dates of data. Item 0 is today and each subsequent item is further in the past.
+        Indices do not necessarily correspond to days
         """
 
         if ticker in self.sentiment:
             return self.sentiment[ticker]
         return None
 
-    def get_all_sentiment(self) -> typing.Dict[str, Sentiment]:
+    def get_all_sentiment(self) -> typing.Dict[str, typing.List[Sentiment]]:
         """
-        Returns a map of all sentiment data
+        Returns a map of all sentiment data over time
         """
 
         return self.sentiment

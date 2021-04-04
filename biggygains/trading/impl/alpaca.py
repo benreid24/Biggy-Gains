@@ -116,3 +116,10 @@ class AlpacaTradeInterface(TradeInterface):
 
     def open_orders(self):
         return [order for order in self.pending_orders.values()]
+
+    def ticker_exists(self, ticker):
+        try:
+            asset = self.api.get_asset(ticker)
+            return asset.tradable
+        except:
+            return False

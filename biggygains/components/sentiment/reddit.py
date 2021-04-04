@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 alnum = re.compile('[^a-zA-Z\d\s]+')
 
 
+"""
+Storage class for a reddit comment and its sentiment. Ids are stored to
+prevent duplication of comments
+"""
 class Comment:
     def __init__(self, id, comment, ticker, sentiment):
         self.id = id
@@ -34,6 +38,11 @@ class Comment:
         }
 
 
+"""
+Container class for a days worth of comments. Comments for the active day are
+used to evaluate current sentiment. Past days of sentiment only stored
+aggregated. Today's comments are individually stored
+"""
 class DayComments:
     def __init__(self, date: datetime.date, data: dict=None):
         self.date = date
@@ -55,6 +64,11 @@ class DayComments:
         }
 
     def add_comment(self, date: datetime.date, comment: Comment) -> typing.Dict[str, Sentiment]:
+        """
+        Adds a comment to todays set. If the comment is from a future date the internal
+        data is reset and the aggregated data for the day is returned
+        """
+
         if date == self.date:
             self.data[comment.id] = comment
             return None
@@ -65,6 +79,10 @@ class DayComments:
             return aggregate
 
     def aggregate(self) -> typing.Dict[str, Sentiment]:
+        """
+        Returns a minified aggregation of comment data into sentiment data
+        """
+
         sentiment = {}
         for comment in self.data:
             if comment.ticker in sentiment:
@@ -81,6 +99,9 @@ class DayComments:
         }
 
 
+"""
+Collector and aggregator of reddit sentiment data
+"""
 class RedditSentimentSource(SentimentSource):
     _DATA_PERSIST_KEY = 'RedditSentimentSource_persistence_v1'
 

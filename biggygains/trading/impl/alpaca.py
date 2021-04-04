@@ -8,7 +8,7 @@ from biggygains.trading.portfolio import Position
 
 from alpaca_trade_api import REST as Alpaca
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('AlpacaTradeInterface')
 
 
 class AlpacaPricingSource(PricingSource):
@@ -28,9 +28,10 @@ class AlpacaPricingSource(PricingSource):
 
 
 class AlpacaTradeInterface(TradeInterface):
-    def __init__(self, api: Alpaca):
-        self.api = api # Was only able to get API working by passing in keys, env vars failed
+    def __init__(self, key, secret, endpoint):
+        self.api = Alpaca(key, secret, endpoint)
         self.pending_orders = {}
+        self.cached_tickers = {}
 
     def initialize(self, env: Environment):
         try:
@@ -119,7 +120,11 @@ class AlpacaTradeInterface(TradeInterface):
 
     def ticker_exists(self, ticker):
         try:
+            if ticker in self.cached_tickers:
+                return self.cached_tickers[ticker]
             asset = self.api.get_asset(ticker)
+            self.cached_tickers[ticker] = asset.tradable
             return asset.tradable
         except:
+            self.cached_tickers[ticker] = False
             return False

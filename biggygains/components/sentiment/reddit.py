@@ -10,7 +10,7 @@ import praw
 from biggygains.environment.interface import Environment
 from .interface import Sentiment, SentimentSource, SentimentAnalyzer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('RedditSentimentSource')
 alnum = re.compile('[^a-zA-Z\d\s]+')
 
 
@@ -25,7 +25,7 @@ class Comment:
         self.ticker = ticker
         self.sentiment = sentiment
 
-    @classmethod
+    @staticmethod
     def from_dict(d):
         return Comment(d['id'], d['comment'], d['ticker'], d['sentiment'])
 
@@ -48,14 +48,18 @@ class DayComments:
         self.date = date
         self.data = {}
 
-    @classmethod
+    @staticmethod
     def from_dict(d):
-        return DayComments(d['date'], d['data'])
+        return DayComments(datetime.date.fromisoformat(d['date']), d['data'])
 
     def to_dict(self):
+        data = {
+            cid: comment.to_dict()
+            for cid, comment in self.data.items()
+        }
         return {
-            'date': self.date,
-            'data': self.data
+            'date': self.date.isoformat(),
+            'data': data
         }
 
     def add_comment(self, date: datetime.date, comment: Comment) -> typing.Dict[str, Sentiment]:
@@ -79,7 +83,7 @@ class DayComments:
         """
 
         sentiment = {}
-        for comment in self.data:
+        for comment in self.data.values():
             if comment.ticker in sentiment:
                 sentiment[comment.ticker]['value'] += comment.sentiment
                 sentiment[comment.ticker]['count'] += 1
@@ -127,6 +131,7 @@ class RedditSentimentSource(SentimentSource):
         self.lock.release()
 
     def initialize(self, env: Environment):
+        logger.info('Initializing reddit sentiment source')
         self.env = env
 
         try:
@@ -137,15 +142,19 @@ class RedditSentimentSource(SentimentSource):
             )
             self.subreddit = self.api.subreddit('+'.join(self.subs))
             self.thread = threading.Thread(target=self._background_listener)
+            logger.info('Connected to reddit api')
 
+            logger.info('Loading stored comments')
             stored_comments = env.datastore.retrieve_data(RedditSentimentSource._DATA_PERSIST_KEY)
             if stored_comments:
                 self._load_from_store(stored_comments)
-            else:
-                self._load_from_reddit()
+            
+            logger.info('Loading new reddit posts')
+            self._load_from_reddit()
 
             self.update(env)
             self.thread.start()
+            logger.info('Started background listener for new comments')
 
         except Exception:
             logger.exception('Failed to initialize reddit feed')
@@ -177,9 +186,16 @@ class RedditSentimentSource(SentimentSource):
             self.comments = DayComments.from_dict(data['today'])
 
     def _load_from_reddit(self):
-        for post in self.subreddit.new(limit=500):
-            for comment in post.comments.list():
+        def handle_comment(self, comment):
+            if isinstance(comment, praw.models.MoreComments):
+                for c in comment.comments():
+                    handle_comment(c)
+            else:
                 self._analyze_comment(comment)
+
+        for post in self.subreddit.new(limit=5):
+            for comment in post.comments.list():
+                handle_comment(self, comment)
     
     def _extract_ticker(self, comment: str):
         words = alnum.sub('', comment).split()
@@ -189,6 +205,8 @@ class RedditSentimentSource(SentimentSource):
         tickers = list(set(tickers))
         if len(tickers) == 1:
             return tickers[0]
+        if len(tickers) > 1:
+            return None # No sense identifying lowercase tickers when many real uppercase
 
         # See if maybe they included a ticker not capitalized
         maybe = [word for word in words if len(word) in [3, 4] and word not in possible]
@@ -201,20 +219,23 @@ class RedditSentimentSource(SentimentSource):
         return None
 
     def shutdown(self, env: Environment):
-        self.running = False
-        self.thread.join()
-        
-        past_data = [
-            {
-                ticker: sentiment.to_dict()
-                for ticker, sentiment in day.items()
-            } for day in self.past_days
-        ]
-        data = {
-            'past': past_data,
-            'today': self.comments.to_dict()
-        }
-        env.datastore.store_data(RedditSentimentSource._DATA_PERSIST_KEY, json.dumps(data))
+        try:
+            self.running = False
+            self.thread.join()
+            
+            past_data = [
+                {
+                    ticker: sentiment.to_dict()
+                    for ticker, sentiment in day.items()
+                } for day in self.past_days
+            ]
+            data = {
+                'past': past_data,
+                'today': self.comments.to_dict()
+            }
+            env.datastore.store_data(RedditSentimentSource._DATA_PERSIST_KEY, json.dumps(data))
+        except Exception:
+            logger.exception('Error cleaning up Reddit sentiment source')
 
     def _background_listener(self):
         try:

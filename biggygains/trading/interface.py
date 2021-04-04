@@ -6,7 +6,7 @@ import typing
 if typing.TYPE_CHECKING:
     from biggygains.environment.interface import Environment
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Trading.interface')
 
 
 """

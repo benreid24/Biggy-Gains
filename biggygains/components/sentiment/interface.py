@@ -6,7 +6,7 @@ import logging
 if typing.TYPE_CHECKING:
     from biggygains.environment.interface import Environment
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('SentimentSource.interface')
 
 
 """
@@ -22,7 +22,7 @@ class Sentiment:
         self.value = value
         self.confidence = confidence
 
-    @classmethod
+    @staticmethod
     def from_dict(d: dict) -> Sentiment:
         return Sentiment(d['ticker'], d['value'], d['confidence'])
 

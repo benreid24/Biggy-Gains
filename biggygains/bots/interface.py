@@ -6,7 +6,7 @@ import typing
 if typing.TYPE_CHECKING:
     from biggygains.environment.interface import Environment
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Bot.interface')
 
 
 """
@@ -36,4 +36,3 @@ class Bot:
         """
 
         logger.error(f'initialize() is unimplemented in {type(self).__name__}')
-        pass

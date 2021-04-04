@@ -15,7 +15,7 @@ from biggygains.bots.interface import Bot
 
 from biggygains.trading.portfolio import Portfolio
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Environment.interface')
 
 
 """

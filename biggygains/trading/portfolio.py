@@ -1,7 +1,7 @@
 import logging
 import typing
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Portfolio')
 
 
 """

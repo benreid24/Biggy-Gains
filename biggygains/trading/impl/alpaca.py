@@ -12,8 +12,8 @@ logger = logging.getLogger('AlpacaTradeInterface')
 
 
 class AlpacaPricingSource(PricingSource):
-    def __init__(self, api: Alpaca):
-        self.api = api
+    def __init__(self, key, secret, endpoint):
+        self.api = Alpaca(key, secret, endpoint)
 
     def initialize(self, env: Environment):
         return True

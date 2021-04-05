@@ -7,7 +7,7 @@ import threading
 
 import praw
 
-from environment.interface import Environment
+from biggygains.environment.interface import Environment
 from .interface import Sentiment, SentimentSource, SentimentAnalyzer
 
 logger = logging.getLogger('RedditSentimentSource')
@@ -142,7 +142,7 @@ class RedditSentimentSource(SentimentSource):
                 client_secret=self.secret,
                 user_agent='Biggy-Gains by u/ilikecheetos42'
             )
-            self.subreddit = self.api.subreddit('+'.join(self.subs))
+            self.subreddit = self.api.subreddit(self.subs)
             self.thread = threading.Thread(target=self._background_listener)
             logger.info('Connected to reddit api')
 

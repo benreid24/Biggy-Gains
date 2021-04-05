@@ -1,7 +1,7 @@
 import logging
 
 from .interface import Bot
-from environment.interface import Environment
+from biggygains.environment.interface import Environment
 
 logger = logging.getLogger('BenSentimentBot')
 

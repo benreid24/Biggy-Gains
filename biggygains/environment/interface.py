@@ -5,15 +5,15 @@ import logging
 import datetime
 import time
 
-from components.sentiment.interface import Sentiment, SentimentSource
-from trading.stock import Order, ExecutedOrder
-from trading.interface import TradeInterface, PricingSource
-from datastore.interface import Datastore
-from bots.interface import Bot
+from biggygains.components.sentiment.interface import Sentiment, SentimentSource
+from biggygains.trading.stock import Order, ExecutedOrder
+from biggygains.trading.interface import TradeInterface, PricingSource
+from biggygains.datastore.interface import Datastore
+from biggygains.bots.interface import Bot
 
 
 
-from trading.portfolio import Portfolio
+from biggygains.trading.portfolio import Portfolio
 
 logger = logging.getLogger('Environment.interface')
 
@@ -150,21 +150,31 @@ class Environment:
             self._shutdown()
 
     def initialize(self) -> bool:
+        if not self.datastore.initialize():
+            logger.error(f'Failed to initialize Datastore {type(self.datastore).__name__}')
+            return False
+
+        if not self._initialize():
+            logger.error(f'Failed to initialize custom environment: {type(self).__name__}')
+            return False
+
+        if not self.trade_interface.initialize(self):
+            logger.error('Failed to initialize trading interface')
+            return False
+
+        if not self.price_source.initialize(self):
+            logger.error('Failed to initialize pricing source')
+            return False
+
         for sentiment_source in self.sentiment_sources:
             if not sentiment_source.initialize(self):
                 logger.error(f'Failed to initialize SentimentSource {type(sentiment_source).__name__}')
                 return False
-        if not self.trade_interface.initialize(self):
-            logger.error('Failed to initialize trading interface')
-            return False
-        if not self.price_source.initialize(self):
-            logger.error('Failed to initialize pricing source')
-            return False
-        if not self._initialize():
-            logger.error(f'Failed to initialize custom environment: {type(self).__name__}')
+
         if not self.bot.initialize(self):
             logger.error('Failed to initialize bot')
             return False
+
         return True
 
     def _shutdown(self):

@@ -4,7 +4,7 @@ import logging
 import typing
 
 if typing.TYPE_CHECKING:
-    from environment.interface import Environment
+    from biggygains.environment.interface import Environment
 
 logger = logging.getLogger('Bot.interface')
 

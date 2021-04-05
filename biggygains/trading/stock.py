@@ -5,7 +5,7 @@ import enum
 import typing
 
 if typing.TYPE_CHECKING:
-    from environment.interface import Environment
+    from biggygains.environment.interface import Environment
 
 
 """

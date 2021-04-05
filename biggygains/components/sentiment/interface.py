@@ -4,7 +4,7 @@ import typing
 import logging
 
 if typing.TYPE_CHECKING:
-    from biggygains.environment.interface import Environment
+    from environment.interface import Environment
 
 logger = logging.getLogger('SentimentSource.interface')
 

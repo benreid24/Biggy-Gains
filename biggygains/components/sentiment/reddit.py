@@ -7,7 +7,7 @@ import threading
 
 import praw
 
-from biggygains.environment.interface import Environment
+from environment.interface import Environment
 from .interface import Sentiment, SentimentSource, SentimentAnalyzer
 
 logger = logging.getLogger('RedditSentimentSource')

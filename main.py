@@ -54,13 +54,17 @@ def main():
     parser.add_argument('env_type', type=EnvironmentType, choices=list(EnvironmentType), help='The name of the environment to run in')
     parser.add_argument('bot_type', type=BotType, choices=list(BotType), help='The name of the bot to run')
     parser.add_argument('datastore', type=DatastoreType, choices=list(DatastoreType), help='Underlying datastore to use to persist runtime data')
+
     parser.add_argument('--reddit-key', type=str, default=os.environ.get('REDDIT_KEY'), help='The key id for accessing Reddit data')
     parser.add_argument('--reddit-secret', type=str, default=os.environ.get('REDDIT_SECRET'), help='The key secret for accessing Reddit data')
     parser.add_argument('--reddit-subs', type=str, default='wallstreetbets', help='Subreddits formatted as "sub1+sub2+sub3"')
     parser.add_argument('--alpaca-url', type=str, default=os.environ.get('ALPACA_URL'), help='The Alpaca endpoint to trade through (paper vs live)')
     parser.add_argument('--alpaca-key', type=str, default=os.environ.get('ALPACA_KEY'), help='The key id for interfacing with Alpaca')
     parser.add_argument('--alpaca-secret', type=str, default=os.environ.get('ALPACA_SECRET'), help='The key secret for interfacing with Alpaca')
+
     # TODO - datastore parameters (connection info etc)
+
+    parser.add_argument('--clear-datastore', default=False, action='store_true', help='Clear the datastore of all data before starting the bot')
     parser.add_argument('--log-level', type=str, default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Logging verbosity')
     args = parser.parse_args()
 
@@ -108,7 +112,7 @@ def main():
 
     env.set_datastore(datastore)
     env.connect_bot(bot)
-    if not env.initialize():
+    if not env.initialize(args.clear_datastore):
         logger.error('Failed to run environment initialization, exiting')
         return
     env.run()

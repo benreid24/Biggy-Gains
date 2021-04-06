@@ -57,3 +57,8 @@ Bot is one of:
 Datastore is one of:
 - `memory`: In memory datastore with no persistence. Good for testing
 - More to come...
+
+## Tools
+Due to the need for labeled data sets and trained models several tools are contained within this repository. Implemented so far are:
+- [Reddit Comment Collector](tools/reddit/collector.py): Collects Reddit comments in realtime and saves them to a JSON file. Run with `python collector.py [options]`
+- [Reddit Comment Labeler](tools/reddit/labeler.py): Takes collected comments and prompts the user for ticker and sentiment information. Run with `python labeler.py <comment file>`

@@ -103,6 +103,8 @@ Collector and aggregator of reddit sentiment data
 """
 class RedditSentimentSource(SentimentSource):
     _DATA_PERSIST_KEY = 'RedditSentimentSource_persistence_v1'
+    _LOOKBACK_PERIOD = 5 # TODO - increase when not testing
+    _VALID_TICKER_LENGTHS = [3, 4]
 
     def __init__(self, analyzer: SentimentAnalyzer, key: str, secret: str, subs: typing.List[str]):
         super().__init__()
@@ -140,7 +142,7 @@ class RedditSentimentSource(SentimentSource):
                 client_secret=self.secret,
                 user_agent='Biggy-Gains by u/ilikecheetos42'
             )
-            self.subreddit = self.api.subreddit('+'.join(self.subs))
+            self.subreddit = self.api.subreddit(self.subs)
             self.thread = threading.Thread(target=self._background_listener)
             logger.info('Connected to reddit api')
 
@@ -193,13 +195,13 @@ class RedditSentimentSource(SentimentSource):
             else:
                 self._analyze_comment(comment)
 
-        for post in self.subreddit.new(limit=5):
+        for post in self.subreddit.new(limit=RedditSentimentSource._LOOKBACK_PERIOD):
             for comment in post.comments.list():
                 handle_comment(self, comment)
     
     def _extract_ticker(self, comment: str):
         words = alnum.sub('', comment).split()
-        possible = [word for word in words if word.isupper() and len(word) in [3, 4]]
+        possible = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
 
         tickers = [ticker for ticker in possible if self.env.ticker_exists(ticker)]
         tickers = list(set(tickers))
@@ -209,7 +211,7 @@ class RedditSentimentSource(SentimentSource):
             return None # No sense identifying lowercase tickers when many real uppercase
 
         # See if maybe they included a ticker not capitalized
-        maybe = [word for word in words if len(word) in [3, 4] and word not in possible]
+        maybe = [word for word in words if len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
         tickers = [ticker for ticker in maybe if self.env.ticker_exists(ticker.upper())]
         tickers = list(set(tickers))
         if len(tickers) == 1:

@@ -12,8 +12,8 @@ logger = logging.getLogger('AlpacaTradeInterface')
 
 
 class AlpacaPricingSource(PricingSource):
-    def __init__(self, api: Alpaca):
-        self.api = api
+    def __init__(self, key, secret, endpoint):
+        self.api = Alpaca(key, secret, endpoint)
 
     def initialize(self, env: Environment):
         return True
@@ -72,7 +72,7 @@ class AlpacaTradeInterface(TradeInterface):
     def update(self, env: Environment):
         orders = self.api.list_orders(status='closed', after=datetime.now() - timedelta(days=2), limit=500)
         for order in orders:
-            if order['id'] in self.pending_orders:
+            if order.id in self.pending_orders:
                 logger.info(f'Order {order.id} executed')
                 env.notify_order_completed(ExecutedOrder(
                     order.symbol,

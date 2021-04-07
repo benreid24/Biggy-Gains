@@ -149,10 +149,14 @@ class Environment:
         finally:
             self._shutdown()
 
-    def initialize(self) -> bool:
+    def initialize(self, clear_datastore) -> bool:
         if not self.datastore.initialize():
             logger.error(f'Failed to initialize Datastore {type(self.datastore).__name__}')
             return False
+        if clear_datastore:
+            if not self.datastore.clear():
+                logger.error(f'Failed to clear Datastore {type(self.datastore).__name__}')
+                return False
 
         if not self._initialize():
             logger.error(f'Failed to initialize custom environment: {type(self).__name__}')

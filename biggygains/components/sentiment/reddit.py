@@ -104,7 +104,7 @@ Collector and aggregator of reddit sentiment data
 class RedditSentimentSource(SentimentSource):
     _DATA_PERSIST_KEY = 'RedditSentimentSource_persistence_v1'
     _LOOKBACK_PERIOD = 5 # TODO - increase when not testing
-    _VALID_TICKER_LENGTHS = [3, 4]
+    _VALID_TICKER_LENGTHS = [2, 3, 4]
 
     def __init__(self, analyzer: SentimentAnalyzer, key: str, secret: str, subs: typing.List[str]):
         super().__init__()

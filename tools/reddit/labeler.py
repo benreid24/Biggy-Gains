@@ -5,6 +5,8 @@ import re
 import sys
 import os
 
+from alpaca_trade_api import REST as Alpaca
+
 sys.path.insert(0, os.path.abspath('../../'))
 from biggygains.components.sentiment.reddit import RedditSentimentSource
 
@@ -60,6 +62,8 @@ class Dialog:
         words = alnum.sub('', text).split()
         tickers = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
         self.ticker = tk.StringVar(value=comment['ticker'] if 'ticker' in comment else '_other_')
+        self.other_entry.delete(0, tk.END)
+        self.other_entry.insert(0, self.ticker.get())
 
         for w in self.ticker_frame.winfo_children():
             w.destroy()
@@ -96,11 +100,49 @@ class Dialog:
         self.root.mainloop()
 
 
+class TickerFilter:
+    def __init__(self, key, secret):
+        self.api = Alpaca(key, secret, 'https://paper-api.alpaca.markets')
+        self.cached_tickers = {}
+
+    def ticker_exists(self, ticker):
+        try:
+            if ticker in self.cached_tickers:
+                return self.cached_tickers[ticker]
+            asset = self.api.get_asset(ticker)
+            self.cached_tickers[ticker] = asset.tradable
+            return asset.tradable
+        except:
+            self.cached_tickers[ticker] = False
+            return False
+
+    def filter_pass(self, comment):
+        words = alnum.sub('', comment).split()
+        tickers = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
+        for word in words:
+            if self.ticker_exists(word):
+                return True
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=str, help='File to read existing comments from and write labeled comments to')
+    parser.add_argument('--alpaca-key', type=str, default=os.environ.get('ALPACA_KEY'), help='The key id for interfacing with Alpaca')
+    parser.add_argument('--alpaca-secret', type=str, default=os.environ.get('ALPACA_SECRET'), help='The key secret for interfacing with Alpaca')
     parser.add_argument('--skip-completed', default=False, action='store_true', help='Skips comments already labeled')
+    parser.add_argument('--filter-no-ticker', default=False, action='store_true', help='True to filter out comments with no detected tickers')
     args = parser.parse_args()
+
+    ticker_filter = None
+    if args.filter_no_ticker:
+        if not args.alpaca_key:
+            print('--alpaca-key is required for --filter-no-ticker')
+            return
+        if not args.alpaca_secret:
+            print('--alpaca-secret is required for --filter-no-ticker')
+            return
+        ticker_filter = TickerFilter(args.alpaca_key, args.alpaca_secret)
 
     comments = {}
     with open(args.input_file, 'r') as f:
@@ -110,8 +152,14 @@ def main():
     dialog = Dialog()
     for comment_id in list(comments.keys()):
         remaining -= 1
+        
         if args.skip_completed and 'ticker' in comments[comment_id]:
             continue
+        if ticker_filter:
+            if not ticker_filter.filter_pass(comments[comment_id]['body']):
+                print(f'Filtering comment with no ticker: {comments[comment_id]["body"]}')
+                comments.pop(comment_id, None)
+                continue
         
         dialog.update(comments[comment_id], remaining)
         dialog.prompt()

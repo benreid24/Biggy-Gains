@@ -105,6 +105,44 @@ class RedditSentimentSource(SentimentSource):
     _DATA_PERSIST_KEY = 'RedditSentimentSource_persistence_v1'
     _LOOKBACK_PERIOD = 5 # TODO - increase when not testing
     _VALID_TICKER_LENGTHS = [2, 3, 4]
+    _TICKER_EXCLUDES = {
+        'LEAP',
+        'SPAC',
+        'RH',
+        'YOLO',
+        'WSB',
+        'EV',
+        'GET',
+        'THE',
+        'UP',
+        'DOWN'
+        'FUCK',
+        'EOD',
+        'BUT'
+        'IDK',
+        'BUY',
+        'SELL',
+        'MY',
+        'TO',
+        'FOR',
+        'DD',
+        'FOMO',
+        'SOL',
+        'ATH',
+        'USA',
+        'IRS',
+        'IPO',
+        'ON',
+        'OFF',
+        'TDA',
+        'ONE',
+        'IS',
+        'LOL',
+        'DM',
+        'LMAO',
+        'EOW',
+        'PE'
+    }
 
     def __init__(self, analyzer: SentimentAnalyzer, key: str, secret: str, subs: typing.List[str]):
         super().__init__()
@@ -201,7 +239,12 @@ class RedditSentimentSource(SentimentSource):
     
     def _extract_ticker(self, comment: str):
         words = alnum.sub('', comment).split()
-        possible = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
+        possible = [
+            word for word in words
+            if word.isupper()
+            and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS
+            and word not in RedditSentimentSource._TICKER_EXCLUDES
+        ]
 
         tickers = [ticker for ticker in possible if self.env.ticker_exists(ticker)]
         tickers = list(set(tickers))
@@ -211,7 +254,11 @@ class RedditSentimentSource(SentimentSource):
             return None # No sense identifying lowercase tickers when many real uppercase
 
         # See if maybe they included a ticker not capitalized
-        maybe = [word for word in words if len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
+        maybe = [
+            word for word in words
+            if len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS
+            and word.upper() not in RedditSentimentSource._TICKER_EXCLUDES
+        ]
         tickers = [ticker for ticker in maybe if self.env.ticker_exists(ticker.upper())]
         tickers = list(set(tickers))
         if len(tickers) == 1:

@@ -61,9 +61,8 @@ class Dialog:
 
         words = alnum.sub('', text).split()
         tickers = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
+        tickers = set(tickers)
         self.ticker = tk.StringVar(value=comment['ticker'] if 'ticker' in comment else '_other_')
-        self.other_entry.delete(0, tk.END)
-        self.other_entry.insert(0, self.ticker.get())
 
         for w in self.ticker_frame.winfo_children():
             w.destroy()
@@ -76,6 +75,8 @@ class Dialog:
         radio = tk.Radiobutton(self.ticker_frame, text='Other', variable=self.ticker, value='_other_')
         radio.pack(anchor=tk.W)
         self.other_entry = tk.Entry(self.ticker_frame)
+        if self.ticker.get() != '_other_':
+            self.other_entry.insert(0, self.ticker.get())
         self.other_entry.pack(anchor=tk.W)
         self.ticker_frame.grid(row=1, column=0)
 
@@ -118,9 +119,14 @@ class TickerFilter:
 
     def filter_pass(self, comment):
         words = alnum.sub('', comment).split()
-        tickers = [word for word in words if word.isupper() and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS]
-        for word in words:
-            if self.ticker_exists(word):
+        tickers = [
+            word for word in words
+            if word.isupper()
+            and len(word) in RedditSentimentSource._VALID_TICKER_LENGTHS
+            and word not in RedditSentimentSource._TICKER_EXCLUDES
+        ]
+        for ticker in tickers:
+            if self.ticker_exists(ticker):
                 return True
         return False
 
@@ -171,6 +177,7 @@ def main():
 
     with open(args.input_file, 'w') as f:
         f.write(json.dumps(comments))
+        print('Wrote data')
 
 
 if __name__ == '__main__':
